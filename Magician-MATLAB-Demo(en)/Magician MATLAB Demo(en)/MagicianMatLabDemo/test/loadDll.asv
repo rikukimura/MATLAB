@@ -1,0 +1,33 @@
+%load DobotDll
+if ~libisloaded('DobotDll')
+    loadlibrary('DobotDll.dll','DobotDll.h');
+end
+%libfunctionsview DobotDll
+%create size 128 charArrays
+ch=blanks(128);
+%create pointer piont to charArrays
+str1= libpointer('cstring',ch);
+%search the magician device res1:device number res2:device address
+[res1,res2]=calllib('DobotDll','SearchDobot',str1,128);
+%create pointer piont to device address
+str2= libpointer('cstring',res2);
+[res3,res4]=calllib('DobotDll','ConnectDobot',str2, 115200);
+queue_index=0;
+ptp.ptpMode=0;
+ptp.x=200.0;
+ptp.y=0.0;
+ptp.z=0.0;
+ptp.r=0.0;
+calllib('DobotDll','SetQueuedCmdStartExec');
+ptpstruct=libstruct('tagPTPCmd',ptp);
+ptpstructptr=libpointer('tagPTPCmdPtr',ptpstruct);
+queue_index_ptr=libpointer('uint64Ptr',queue_index);
+calllib('DobotDll','SetPTPCmd',ptpstructptr,true,queue_index_ptr);
+calllib('DobotDll','SetQueuedCmdStopExec');
+calllib('DobotDll','DisconnectDobot'); 
+clear ptpstruct;
+clear ptpstructptr;
+clear str1;
+clear str2;
+clear queue_index_ptr;
+%unloadlibrary DobotDll;
